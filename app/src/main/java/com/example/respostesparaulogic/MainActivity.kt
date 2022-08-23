@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             strOutput = URL("https://vilaweb.cat/paraulogic/").readText()
             var dicc = Jsoup.parse(strOutput)
-            var today = dicc.body().select("script")[1].toString()
+            var today = dicc.body().select("script")[0].toString()
             today = today.split("var t={")[1].split("}")[0]
             val lletres = today.split("[")[1].split("]")[0].split(",")
             val paraules = today.split("{")[1].split(",")
