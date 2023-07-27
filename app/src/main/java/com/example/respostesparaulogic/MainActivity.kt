@@ -32,28 +32,32 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             strOutput = URL("https://vilaweb.cat/paraulogic/").readText()
             var dicc = Jsoup.parse(strOutput)
-            var today = dicc.body().select("script")[0].toString()
-            today = today.split("var t={")[1].split("}")[0]
-            val lletres = today.split("[")[1].split("]")[0].split(",")
-            val paraules = today.split("{")[1].split(",")
-            strOutput="Tutis:\n"
-            var no_tutis = mutableListOf<String>()
-            for (paraula in paraules){
-                var key = paraula.split(":")[0]
-                var poss_tuti =true
-                for (lletra in lletres){
-                    poss_tuti = poss_tuti && key.contains(lletra.toCharArray()[1])
+            var scriptElements = dicc.body().select("script")
+            for(scriptElement in scriptElements) {
+                val scriptContent = scriptElement.data()
+                if (scriptContent.contains("var y={")) {
+                    var today = scriptContent.toString().split("var t={")[1].split("}")[0]
+                    val lletres = today.split("[")[1].split("]")[0].split(",")
+                    val paraules = today.split("{")[1].split(",")
+                    strOutput = "Tutis:\n"
+                    var no_tutis = mutableListOf<String>()
+                    for (paraula in paraules) {
+                        var key = paraula.split(":")[0]
+                        var poss_tuti = true
+                        for (lletra in lletres) {
+                            poss_tuti = poss_tuti && key.contains(lletra.toCharArray()[1])
+                        }
+                        if (poss_tuti == true) {
+                            strOutput = strOutput + key + "\n"
+                        } else {
+                            no_tutis.add(key)
+                        }
+                    }
+                    strOutput = strOutput + "\nResta:\n"
+                    for (no_tuti in no_tutis) {
+                        strOutput = strOutput + no_tuti + ", "
+                    }
                 }
-                if (poss_tuti == true){
-                    strOutput = strOutput + key +"\n"
-                }
-                else{
-                    no_tutis.add(key)
-                }
-            }
-            strOutput = strOutput + "\nResta:\n"
-            for(no_tuti in no_tutis){
-                strOutput = strOutput + no_tuti + ", "
             }
         }.invokeOnCompletion{runOnUiThread { changeText() } }
     }
